@@ -26,6 +26,24 @@ O objetivo principal deste projeto é a implementação e validação de um pipe
 
 ---
 
+## Recursos Externos (Download)
+
+Devido ao tamanho dos arquivos, o dataset completo (imagens SAR, gabaritos de referência e modelo treinado) é disponibilizado através de uma pasta compartilhada no Google Drive.
+
+### Download dos Dados e Modelo
+
+Clique no link abaixo para acessar a pasta compartilhada:
+
+**[BAIXAR DADOS E MODELO TREINADO – GOOGLE DRIVE]([INSIRA_AQUI_O_LINK_DO_DRIVE](https://drive.google.com/drive/folders/1CrR6bZwz-VOAD_6aB_eJR7c_lw8040SB?usp=drive_link))**
+
+O conteúdo disponibilizado inclui:
+
+- Imagens SAR originais utilizadas no estudo (`.tif`);
+- Arquivos de referência (`.geojson`);
+- Modelo treinado (`unet_resnet34.pth`);
+- Estrutura de diretórios compatível com o notebook.
+---
+
 ## Metodologia
 
 O sistema utiliza uma arquitetura de segmentação semântica **U-Net** com encoder **ResNet34**, inicializada com pesos pré-treinados da **ImageNet**.
@@ -79,21 +97,33 @@ O modelo foi capaz de localizar **29 das 31 embarcações reais**, atingindo uma
 
 O notebook foi desenvolvido para execução no **Google Colab** integrado ao **Google Drive**.
 
-### Pré-requisitos
+### Configuração Inicial
 
-Crie a seguinte estrutura na raiz do seu Google Drive:
+1. Acesse o link do Google Drive disponibilizado em "Recursos Externos (Downloads)".
+
+2. Faça uma das seguintes opções:
+
+   - Baixe a pasta **Dados_TCC_Garimpo** para sua conta;
+   - Ou adicione a pasta compartilhada diretamente ao seu Google Drive.
+
+3. Certifique-se de que a pasta esteja localizada na raiz do seu Google Drive:
+
+```text
+/content/drive/MyDrive/Dados_TCC_Garimpo
+```
+
+A estrutura esperada é:
 
 ```text
 Dados_TCC_Garimpo/
 ├── imagens_sar_originais/
-│   ├── cena_01.tif
-│   ├── cena_02.tif
-│   └── ...
-│
 ├── gabarito_2025_06.geojson
 ├── gabarito_2025_07.geojson
-└── gabarito_2025_08.geojson
+├── gabarito_2025_08.geojson
+└── unet_resnet34.pth
 ```
+
+> **Importante:** Os caminhos utilizados pelo notebook assumem que a pasta `Dados_TCC_Garimpo` está localizada diretamente na raiz do Google Drive. Caso ela seja movida para outro diretório, será necessário ajustar manualmente os caminhos definidos no código.
 
 ---
 
