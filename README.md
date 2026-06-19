@@ -34,7 +34,7 @@ Devido ao tamanho dos arquivos, o dataset completo (imagens SAR, gabaritos de re
 
 Clique no link abaixo para acessar a pasta compartilhada:
 
-**[BAIXAR DADOS E MODELO TREINADO – GOOGLE DRIVE]([INSIRA_AQUI_O_LINK_DO_DRIVE](https://drive.google.com/drive/folders/1CrR6bZwz-VOAD_6aB_eJR7c_lw8040SB?usp=drive_link))**
+**[BAIXAR DADOS E MODELO TREINADO – GOOGLE DRIVE](https://drive.google.com/drive/folders/1CrR6bZwz-VOAD_6aB_eJR7c_lw8040SB?usp=drive_link)**
 
 O conteúdo disponibilizado inclui:
 
