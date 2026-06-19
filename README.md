@@ -4,7 +4,7 @@ Este repositório contém o código-fonte, a estrutura de dados e os recursos de
 
 ## Objetivo
 
-O objetivo principal deste projeto é a implementação e validação de um pipeline computacional baseado em **Deep Learning** para a monitorização e contagem automatizada de balsas e dragas de garimpo ilegal na calha do **Rio Madeira** (corredor Rondônia–Amazonas), utilizando imagens de Radar de Abertura Sintética (**SAR**) do satélite **Sentinel-1**.
+O objetivo principal deste projeto é a implementação e validação de um pipeline computacional baseado em **Deep Learning** para a monitorização e contagem automatizada de embarcações de garimpo ilegal na calha do **Rio Madeira** (corredor Rondônia–Amazonas), utilizando imagens de Radar de Abertura Sintética (**SAR**) do satélite **Sentinel-1**.
 
 ---
 
@@ -12,12 +12,13 @@ O objetivo principal deste projeto é a implementação e validação de um pipe
 
 ```text
 ├── data/
-│   ├── gabarito_2025_06.geojson      # Marcações de referência (Junho)
-│   ├── gabarito_2025_07.geojson      # Marcações de referência (Julho)
-│   └── gabarito_2025_08.geojson      # Marcações de referência (Validação - Agosto)
+│   ├── gabarito_2025_06.geojson          # Marcações de referência (Junho)
+│   ├── gabarito_2025_07.geojson          # Marcações de referência (Julho)
+│   └── gabarito_2025_08.geojson          # Marcações de referência (Validação - Agosto)
 │
 ├── notebooks/
-│   └── deteccao_garimpo_sar.ipynb  # Notebook principal com o pipeline completo
+│   ├── 01_inferencia_garimpo_sar.ipynb   # Execução rápida utilizando modelo pré-treinado
+│   └── 02_treinamento_garimpo_sar.ipynb  # Pipeline completo de engenharia de dados e treinamento
 │
 └── README.md
 ```
@@ -38,19 +39,19 @@ Clique no link abaixo para acessar a pasta compartilhada:
 
 O conteúdo disponibilizado inclui:
 
-- Imagens SAR originais utilizadas no estudo (`.tif`);
-- Arquivos de referência (`.geojson`);
-- Modelo treinado (`unet_resnet34.pth`);
-- Estrutura de diretórios compatível com o notebook.
+* Imagens SAR originais utilizadas no estudo (`.tif`);
+* Arquivos de referência (`.geojson`);
+* Modelo treinado (`unet_resnet34.pth`);
+
 ---
 
 ## Metodologia
 
-O sistema utiliza uma arquitetura de segmentação semântica **U-Net** com encoder **ResNet34**, inicializada com pesos pré-treinados da **ImageNet**.
+O sistema utiliza uma arquitetura de segmentação semântica **U-Net** com encoder **ResNet34**, inicializada com pesos pré-treinados da ImageNet.
 
 ### 1. Recorte de Imagens
 
-As imagens SAR originais (polarização **VV**, modo **IW**) são divididas em blocos de **256×256 pixels** com sobreposição espacial (*stride*) de **128 pixels**.
+As imagens SAR originais (polarização VV, modo IW) são divididas em blocos de **256 × 256 pixels** com sobreposição espacial (*stride*) de **128 pixels**.
 
 ### 2. Amostragem Negativa
 
@@ -60,7 +61,7 @@ Foram incluídas regiões propositalmente livres de atividade garimpeira (por ex
 
 Para lidar com o forte desbalanceamento entre classes, foi utilizada uma combinação ponderada de:
 
-```python
+```text
 Loss = 0.5 × BCE + 0.5 × Dice Loss
 ```
 
@@ -79,13 +80,13 @@ Os experimentos demonstraram que a arquitetura **ResNet34** apresentou maior cap
 
 ### Métricas de Validação (Cena Inteira – Agosto/2025)
 
-| Métrica                  | Valor     |
-| ------------------------ | --------- |
-| **F1-Score**             | **0.841** |
-| Precisão (*Precision*)   | 0.763     |
-| Sensibilidade (*Recall*) | 0.935     |
-| IoU de Pixel             | 0.4857    |
-| Limiar de Confiança      | 0.40      |
+| Métrica                | Valor  |
+| ---------------------- | ------ |
+| F1-Score               | 0.841  |
+| Precisão (Precision)   | 0.763  |
+| Sensibilidade (Recall) | 0.935  |
+| IoU de Pixel           | 0.4857 |
+| Limiar de Confiança    | 0.40   |
 
 ### Destaque
 
@@ -95,90 +96,61 @@ O modelo foi capaz de localizar **29 das 31 embarcações reais**, atingindo uma
 
 ## Como Reproduzir o Projeto?
 
-O notebook foi desenvolvido para execução no **Google Colab** integrado ao **Google Drive**.
+Os algoritmos foram desenvolvidos para execução nativa no **Google Colab**, utilizando o **Google Drive** como repositório de dados.
 
-### Configuração Inicial
+Siga os passos abaixo para garantir o funcionamento correto dos caminhos de arquivo.
 
-1. Acesse o link do Google Drive disponibilizado em "Recursos Externos (Downloads)".
+### Passo 1: Configuração dos Dados no Google Drive
 
-2. Faça uma das seguintes opções:
+1. Acesse o link do Google Drive disponibilizado acima;
+2. Adicione um atalho da pasta `Dados_TCC_Garimpo` ou faça o download e upload para sua conta;
+3. Certifique-se de que a pasta esteja localizada exatamente na raiz do seu **Drive**.
 
-   - Baixe a pasta **Dados_TCC_Garimpo** para sua conta;
-   - Ou adicione a pasta compartilhada diretamente ao seu Google Drive.
-
-3. Certifique-se de que a pasta esteja localizada na raiz do seu Google Drive:
+Caminho esperado:
 
 ```text
 /content/drive/MyDrive/Dados_TCC_Garimpo
 ```
 
-A estrutura esperada é:
+### Passo 2: Execução dos Notebooks
+
+Faça o download dos arquivos `.ipynb` da pasta `notebooks/` deste repositório GitHub e faça o upload deles diretamente na interface do Google Colab.
+
+#### Opção A — Inferência Rápida (Recomendado)
+
+Para quem deseja apenas visualizar as detecções e métricas utilizando o modelo já validado.
+
+**Notebook:**
 
 ```text
-Dados_TCC_Garimpo/
-├── imagens_sar_originais/
-├── gabarito_2025_06.geojson
-├── gabarito_2025_07.geojson
-├── gabarito_2025_08.geojson
-└── unet_resnet34.pth
+01_inferencia_garimpo_sar.ipynb
 ```
 
-> **Importante:** Os caminhos utilizados pelo notebook assumem que a pasta `Dados_TCC_Garimpo` está localizada diretamente na raiz do Google Drive. Caso ela seja movida para outro diretório, será necessário ajustar manualmente os caminhos definidos no código.
+**Instruções:**
 
----
+* Abra o notebook no Colab;
+* Conecte sua conta do Google Drive;
+* Clique em **Run All (Executar Tudo)**.
 
-### Opção A — Inferência com Pesos Treinados
+O modelo fará a varredura e salvará as imagens processadas na pasta de resultados.
 
-Recomendado para quem deseja apenas executar as detecções.
+#### Opção B — Treinamento Completo
 
-1. Baixe o arquivo:
+Para reproduzir integralmente os experimentos do zero, desde a geração de amostras até o treinamento da rede neural.
+
+**Notebook:**
 
 ```text
-unet_resnet34.pth
+02_treinamento_garimpo_sar.ipynb
 ```
 
-2. Coloque o arquivo na pasta:
+**Instruções:**
 
-```text
-Dados_TCC_Garimpo/
-```
+* Abra o notebook no Colab;
+* Ative aceleração por hardware (**GPU T4 ou superior**);
+* Execute todas as células.
 
-3. Abra o notebook:
-
-```text
-notebooks/deteccao_garimpo_sar.ipynb
-```
-
-4. Execute:
-
-   * Célula 1
-   * Célula 2
-   * Pule a Célula 3 (Treinamento)
-   * Execute as Células 4 e 5
-
-O modelo carregará os pesos previamente treinados e gerará os mapas e relatórios de detecção.
-
----
-
-### Opção B — Treinamento Completo
-
-Para reproduzir integralmente os experimentos:
-
-1. Abra o notebook no Google Colab;
-2. Ative uma GPU (T4 ou superior);
-3. Execute todas as células em sequência.
-
-O treinamento é realizado por até **80 épocas**, utilizando:
-
-* Otimizador **AdamW**;
-* Early Stopping com **20 épocas de paciência**;
-* Semente global:
-
-```python
-SEED = 42
-```
-
-> Pequenas diferenças na terceira ou quarta casa decimal podem ocorrer devido a variações de hardware entre GPUs disponibilizadas pelo Google Colab.
+O treinamento ocorre por até **80 épocas**, com paciência de **20 épocas** para *Early Stopping*.
 
 ---
 
@@ -205,17 +177,15 @@ SEED = 42
 * SciPy
 * Matplotlib
 
-Todas as dependências são instaladas automaticamente na primeira célula do notebook.
+> Todas as dependências são instaladas automaticamente na primeira célula de cada notebook.
 
 ---
 
 ## Autor
 
 **Fellipe Machado Castro**
-
 Graduando em Ciência da Computação
-
-**Universidade Federal do Pará (UFPA)**
+Universidade Federal do Pará (UFPA)
 
 [fellipemachado77@gmail.com](mailto:fellipemachado77@gmail.com)
 
