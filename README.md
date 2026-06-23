@@ -17,7 +17,7 @@ O objetivo principal deste projeto é a implementação e validação de um pipe
 │   └── gabarito_2025_08.geojson          # Marcações de referência (Validação - Agosto)
 │
 ├── notebooks/
-│   ├── 01_inferencia_garimpo_sar.ipynb   # Execução rápida utilizando modelo pré-treinado
+│   ├── 01_inferencia_garimpo_sar.ipynb   # Audita modelo pré-treinado e gera métricas por objeto
 │   └── 02_treinamento_garimpo_sar.ipynb  # Pipeline completo de engenharia de dados e treinamento
 │
 └── README.md
@@ -29,9 +29,9 @@ O objetivo principal deste projeto é a implementação e validação de um pipe
 
 ## Recursos Externos (Download)
 
-Devido ao tamanho dos arquivos, o dataset completo (imagens SAR, gabaritos de referência e modelo treinado) é disponibilizado através de uma pasta compartilhada no Google Drive.
+Devido ao tamanho dos arquivos, o dataset completo (imagens SAR, gabaritos de referência e modelos treinados) é disponibilizado através de uma pasta compartilhada no Google Drive.
 
-### Download dos Dados e Modelo
+### Download dos Dados e Modelos
 
 Clique no link abaixo para acessar a pasta compartilhada:
 
@@ -41,7 +41,7 @@ O conteúdo disponibilizado inclui:
 
 * Imagens SAR originais utilizadas no estudo (`.tif`);
 * Arquivos de referência (`.geojson`);
-* Modelo treinado (`unet_resnet34.pth`);
+* Modelos treinados (`unet_resnet34.pth` e `unet_resnet50.pth`).
 
 ---
 
@@ -55,7 +55,7 @@ As imagens SAR originais (polarização VV, modo IW) são divididas em blocos de
 
 ### 2. Amostragem Negativa
 
-Foram incluídas regiões propositalmente livres de atividade garimpeira (por exemplo, trechos do rio próximos a Humaitá–AM), permitindo que a rede aprendesse a distinguir embarcações de elementos naturais que frequentemente geram falsos positivos, como bancos de areia expostos durante a estiagem.
+Foram incluídas regiões propositalmente livres de atividade garimpeira (por exemplo, trechos do rio próximos a Humaitá–AM), permitindo que a rede aprendesse a distinguir embarcações de elementos naturais que frequentemente geram falsos positivos, como bancos de areia expostos durante a estação seca.
 
 ### 3. Função de Perda Híbrida
 
@@ -70,7 +70,7 @@ Loss = 0.5 × BCE + 0.5 × Dice Loss
 * Test Time Augmentation (TTA);
 * Reconstrução da cena completa a partir dos blocos preditos;
 * Suavização gaussiana para reduzir artefatos nas bordas;
-* Contagem final das embarcações em nível de cena inteira.
+* Validação rigorosa em nível de objeto (contagem real de embarcações).
 
 ---
 
@@ -78,14 +78,16 @@ Loss = 0.5 × BCE + 0.5 × Dice Loss
 
 Os experimentos demonstraram que a arquitetura **ResNet34** apresentou maior capacidade de generalização frente ao ruído granular (*speckle*) característico das imagens SAR quando comparada à **ResNet50**, que apresentou tendência mais acentuada ao sobreajuste (*overfitting*).
 
-### Métricas de Validação (Cena Inteira – Agosto/2025)
+### Métricas Finais da Cena Completa (Validação – Agosto/2025)
+
+Abaixo estão os resultados oficiais alcançados pela ResNet34 após a fusão dos recortes e filtragem morfológica do rio inteiro.
 
 | Métrica                | Valor  |
 | ---------------------- | ------ |
 | F1-Score               | 0.841  |
 | Precisão (Precision)   | 0.763  |
 | Sensibilidade (Recall) | 0.935  |
-| IoU de Pixel           | 0.4857 |
+| Falsos Positivos (FP)  | 9      |
 | Limiar de Confiança    | 0.40   |
 
 ### Destaque
@@ -103,10 +105,10 @@ Siga os passos abaixo para garantir o funcionamento correto dos caminhos de arqu
 ### Passo 1: Configuração dos Dados no Google Drive
 
 1. Acesse o link do Google Drive disponibilizado acima;
-2. Adicione um atalho da pasta `Dados_TCC_Garimpo` ou faça o download e upload para sua conta;
-3. Certifique-se de que a pasta esteja localizada exatamente na raiz do seu **Drive**.
+2. Adicione um atalho da pasta `Dados_TCC_Garimpo` ou faça o download e upload para o seu próprio Drive;
+3. Certifique-se de que a pasta esteja localizada exatamente na raiz do seu Drive.
 
-Caminho esperado:
+Caminho esperado pelo código:
 
 ```text
 /content/drive/MyDrive/Dados_TCC_Garimpo
@@ -118,7 +120,7 @@ Faça o download dos arquivos `.ipynb` da pasta `notebooks/` deste repositório 
 
 #### Opção A — Inferência Rápida (Recomendado)
 
-Para quem deseja apenas visualizar as detecções e métricas utilizando o modelo já validado.
+Para quem deseja auditar o modelo pré-treinado, visualizando as detecções e calculando a matriz de confusão em nível de objeto.
 
 **Notebook:**
 
@@ -136,7 +138,7 @@ O modelo fará a varredura e salvará as imagens processadas na pasta de resulta
 
 #### Opção B — Treinamento Completo
 
-Para reproduzir integralmente os experimentos do zero, desde a geração de amostras até o treinamento da rede neural.
+Para reproduzir integralmente os experimentos do zero, desde a geração do dataset (extração de chips) até o treinamento da rede neural.
 
 **Notebook:**
 
@@ -150,7 +152,7 @@ Para reproduzir integralmente os experimentos do zero, desde a geração de amos
 * Ative aceleração por hardware (**GPU T4 ou superior**);
 * Execute todas as células.
 
-O treinamento ocorre por até **80 épocas**, com paciência de **20 épocas** para *Early Stopping*.
+> **Nota:** Este script salvará os pesos gerados como unet_[ENCODER_NAME]_novo_treino.pth, garantindo que os pesos oficiais do estudo não sejam sobrescritos acidentalmente. O treinamento ocorre por até 80 épocas, com paciência de 20 épocas para Early Stopping.
 
 ---
 
@@ -167,12 +169,9 @@ O treinamento ocorre por até **80 épocas**, com paciência de **20 épocas** p
 * GeoPandas
 * Shapely
 
-### Data Augmentation
+### Data Augmentation e Visualização
 
 * Albumentations
-
-### Análise e Visualização
-
 * NumPy
 * SciPy
 * Matplotlib
